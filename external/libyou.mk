@@ -1,17 +1,27 @@
 # libtrees.so libhuffman.so
 
-.PHONY: install
-install:
-	if [ -d libyou ]; then \
-		cd libyou; git pull origin main; \
-	else \
-		git clone https://github.com/metwse/libyou/ --depth 1; \
-	fi
+# Required targets
+update: libyou
+	cd libyou; git pull origin main
+
+build: libyou
 	cd libyou; make build/all
-	cp libyou/target/*.so ../../lib/
-	mkdir -p ../../include/libyou/
+
+clean:
+	cd libyou; make clean
+
+install: build
+	mv libyou/target/*.so ../../lib/
+	mkdir -p ../../include/you/
 
 	for module in libyou/*/include; do \
-		cp $$module/* ../../include/libyou/; \
+		cp $$module/* ../../include/you/; \
 		echo $$module; \
 	done
+
+.PHONY: update build clean install
+
+
+# Internal targets
+libyou:
+	git clone https://github.com/metwse/libyou/ --depth 1;

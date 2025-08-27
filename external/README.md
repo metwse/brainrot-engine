@@ -1,29 +1,45 @@
 # External Dependencies Build
-Contains external libraries used by the project. Provides a `Makefile`-based
-system to automatically fetch, build, and install these dependencies, including
-both shared libraries `(.so)` and headers.
+Manages external libraries, uses `Makefile` rules to automatically fetch,
+build, and install dependencies.
 
 ## Directory Structure
 ```
 external/
-├── build/                # Temporary build outputs, internal to build script
-│   └── libyou/
-├── include/              # Installed headers
-│   └── libyou/
-├── lib/                  # Installed shared libraries
-└── libyou.mk             # Build instructions for libyou
+├── build/                  # Temporary build outputs, internal to build script
+│   └── <build-artifacts>
+├── include/                # Installed headers
+│   ├── **.h
+│   └── **.hpp
+├── llibyouib/              # Installed shared libraries
+│   └── *.so
+└── <lib-name>.mk           # Build instructions for <lib-name>
 ```
 
-## Writing a Make Script for External Dependencies
-Each external dependency should have a `Makefile` or `.mk` script that:
-- Clones or updates the repository if necessary.
-- Builds the library.
-- Copies resulting .so files to `lib/`.
-- Copies header files to `include/<library>/`.
-- *Important*: The first line of the script must list the `.so` files that the
-  library exposes.
+## Writing Dependency Scripts
+Each external dependency must provide a `.mk` file under `external/`.
 
-## Integration to Top-Level Makefile
-The top-level `Makefile` automatically detects all .mk files in `external/` and
-ensures `.so` files and headers are copied to the proper locations. Dependency
-tracing done checink `.so` files.
+Rules to implement:
+- `update`: Fetch or update the source (clone repo, download tarball, etc.).
+- `build`: Compile the library.
+- `install`: Copy resulting `.so` files to `external/lib/` and headers to
+  `external/include/`.
+- `clean`: Remove build artifacts.
+
+### First Line Convention
+The first line of each `.mk` file must contain a comment listing the exposed
+`.so` files, e.g.:
+```make
+# libtrees.so libhuffman.so
+```
+The top-level `Makefile` parses this line to track installed libraries.
+
+## Integration with Top-Level Makefile
+| top-level Makefile target | description |
+|--|--|
+| `external-deps/build` | builds all dependencies. |
+| `external-deps/uninstall` | removes `external/build/`, `external/lib/`, and `external/include/`. |
+| `external-deps/clean-build` | clears only build directories. |
+| `external-deps/<target>` | forwards `<target>` to all dependencies.<br>(e.g. `make external-deps/update`, `make external-deps/install`). |
+
+The set of valid `<target>` values is defined by the required targets expected
+in each dependency `.mk` file *(see Writing Dependency Scripts above)*.
