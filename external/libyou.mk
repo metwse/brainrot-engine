@@ -11,7 +11,7 @@ clean:
 	cd libyou; make clean
 
 install: build
-	mv libyou/target/*.so ../../lib/
+	cp libyou/target/*.so ../../lib/
 	mkdir -p ../../include/you/
 
 	for module in libyou/*/include; do \
