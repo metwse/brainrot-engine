@@ -39,7 +39,7 @@ LIB_$1 = $$(foreach so, \
 EXTERNAL_LIBS += $$(LIB_$1)
 
 .SECONDARY:
-external-deps-$1/%: external/build/$1/ external/lib/ external/include/
+external-deps-$1/%: | external/build/$1/ external/lib/ external/include/
 	cd external/build/$1/; \
 		$(MAKE) -f ../../$1.mk $$(patsubst external-deps-$1/%,%,$$@)
 
@@ -86,12 +86,12 @@ $(foreach src, \
 
 $(BUILD_DIR)/$(PROJECT_NAME): $(OBJ_XX) $(EXTERNAL_LIBS) | $(BUILD_DIR)
 	$(CXX) $(CXX_FLAGS) \
-		$? \
+		$^ \
 		-o $@
 
 $(BUILD_DIR)/$(PROJECT_NAME).debug: $(DEBUG_OBJ_XX) $(EXTERNAL_LIBS) | $(BUILD_DIR)
 	$(CXX) $(TXX_FLAGS) \
-		$? \
+		$^ \
 		-o $@
 
 $(BUILD_DIR)/%/: ; mkdir -p $@
